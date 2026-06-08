@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation, useLanguage } from "./context/LanguageContext";
 
 import {
     clearStoredSession,
@@ -23,7 +24,7 @@ function calculateRemainingTime(originalRemaining: number, loadTime: number): nu
     return Math.max(0, originalRemaining - elapsedSeconds);
 }
 
-function PriceCard({ item, loadTime }: { item: ShopItem; loadTime: number }) {
+function PriceCard({ item, loadTime, t }: { item: ShopItem; loadTime: number; t: (key: string) => string }) {
     const currentRemaining = calculateRemainingTime(item.remaining, loadTime);
 
     return (
@@ -31,7 +32,7 @@ function PriceCard({ item, loadTime }: { item: ShopItem; loadTime: number }) {
             <div className="flex items-start justify-between gap-3 mb-4">
                 <h3 className="font-semibold leading-snug">{item.name}</h3>
                 <span className="text-[10px] uppercase tracking-wider text-gray-500 bg-gray-800 border border-gray-700 px-2 py-1 rounded">
-                    {item.discountPercent ? `-${item.discountPercent}%` : "Daily"}
+                    {item.discountPercent ? `-${item.discountPercent}%` : t('daily')}
                 </span>
             </div>
 
@@ -42,14 +43,16 @@ function PriceCard({ item, loadTime }: { item: ShopItem; loadTime: number }) {
 
             <div className="mt-4 flex items-center justify-between text-sm">
                 <div className="text-gray-400">
-                    {item.originalPrice ? (
+                    {item.originalPrice === undefined || item.originalPrice === null ?
+                        <span>{t('updatingIn')} {formatDuration(currentRemaining)}</span> :
                         <span className="line-through">{item.originalPrice} VP</span>
-                    ) : (
-                        <span>Оновлення через {formatDuration(currentRemaining)}</span>
-                    )}
+                    }
                 </div>
                 <div className="font-bold text-yellow-400">
-                    {item.discountedPrice ?? item.price ?? 0} VP
+                    {(item.discountedPrice ?? item.price) === undefined || (item.discountedPrice ?? item.price) === null ?
+                        '--' :
+                        (item.discountedPrice ?? item.price)
+                    } VP
                 </div>
             </div>
         </article>
@@ -61,6 +64,8 @@ export default function HomePage() {
     const [session] = useState<ShopSession | null>(() => readStoredSession());
     const [tick, setTick] = useState(0);
     const loadTimeRef = useRef<number>(0);
+    const t = useTranslation();
+    const { language, setLanguage } = useLanguage();
 
     useEffect(() => {
         // Set load time when we get a session (after login or on mount)
@@ -94,7 +99,7 @@ export default function HomePage() {
             <main className="min-h-screen bg-gray-950 flex items-center justify-center text-white">
                 <div className="text-center space-y-4">
                     <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-red-500 border-t-transparent" />
-                    <p className="text-gray-400 text-sm">Завантажуємо магазин...</p>
+                    <p className="text-gray-400 text-sm">{t('loading')}</p>
                 </div>
             </main>
         );
@@ -109,32 +114,49 @@ export default function HomePage() {
                         <span className="ml-2 text-gray-500">{session.player.tag}</span>
                     </h1>
                     <p className="mt-1 text-xs uppercase tracking-wider text-red-400">
-                        Region: {session.region.toUpperCase()}
+                        {t('region')} {session.region.toUpperCase()}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <div className="rounded-lg border border-gray-800 bg-gray-950 px-4 py-2 font-mono text-yellow-400">
-                        {session.player.vp} VP
+                        {session.player.vp === undefined || session.player.vp === null ?
+                            '--' :
+                            session.player.vp
+                        } {t('vp')}
                     </div>
                     <button
                         onClick={handleLogout}
                         className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 transition-colors hover:border-red-500/40 hover:text-red-300"
                     >
-                        Вийти
+                        {t('logout')}
                     </button>
+                    <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setLanguage('en')}
+                          className={`ml-2 rounded border border-gray-700 px-2 py-1 text-sm ${language === 'en' ? 'border-yellow-400' : 'text-gray-400'}`}
+                        >
+                          🇺🇸
+                        </button>
+                        <button
+                          onClick={() => setLanguage('uk')}
+                          className={`ml-2 rounded border border-gray-700 px-2 py-1 text-sm ${language === 'uk' ? 'border-yellow-400' : 'text-gray-400'}`}
+                        >
+                          🇺🇦
+                        </button>
+                    </div>
                 </div>
             </header>
 
             <section className="max-w-7xl mx-auto">
                 <div className="mb-6 flex items-center gap-2 text-gray-400">
                     <span className="h-2 w-2 rounded-full bg-red-500" />
-                    <h2 className="text-xl font-bold uppercase tracking-wider">Щоденний магазин</h2>
+                    <h2 className="text-xl font-bold uppercase tracking-wider">{t('dailyShop')}</h2>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {session.shop.daily.map((item) => (
-                        <PriceCard key={item.uuid} item={item} loadTime={loadTimeRef.current} />
+                        <PriceCard key={item.uuid} item={item} loadTime={loadTimeRef.current} t={t} />
                     ))}
                 </div>
             </section>
@@ -143,7 +165,7 @@ export default function HomePage() {
                 <section className="max-w-7xl mx-auto mt-12">
                     <div className="mb-6 flex items-center gap-2 text-gray-400">
                         <span className="h-2 w-2 rounded-full bg-purple-500" />
-                        <h2 className="text-xl font-bold uppercase tracking-wider">Нічний ринок</h2>
+                        <h2 className="text-xl font-bold uppercase tracking-wider">{t('nightMarket')}</h2>
                     </div>
 
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -165,11 +187,19 @@ export default function HomePage() {
                                 </div>
 
                                 <div className="mt-4 text-sm text-gray-400">
-                                    <div className="line-through">{item.originalPrice} VP</div>
-                                    <div className="font-bold text-yellow-400">
-                                        {item.discountedPrice} VP
+                                    <div className="line-through">
+                                        {item.originalPrice === undefined || item.originalPrice === null ?
+                                            '--' :
+                                            item.originalPrice
+                                        } VP
                                     </div>
-                                    <div className="mt-1">Закінчується через {formatDuration(calculateRemainingTime(item.remaining, loadTimeRef.current))}</div>
+                                    <div className="font-bold text-yellow-400">
+                                        {item.discountedPrice === undefined || item.discountedPrice === null ?
+                                            '--' :
+                                            item.discountedPrice
+                                        } VP
+                                    </div>
+                                    <div className="mt-1">{t('endingIn')} {formatDuration(calculateRemainingTime(item.remaining, loadTimeRef.current))}</div>
                                 </div>
                             </article>
                         ))}

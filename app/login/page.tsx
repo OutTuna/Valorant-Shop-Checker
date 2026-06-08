@@ -4,21 +4,9 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { BACKEND_URL, saveStoredSession, type ShopSession } from "@/lib/valorant";
+import { useTranslation } from "../context/LanguageContext";
 
 type RegionValue = "auto" | "eu" | "na" | "ap" | "kr" | "latam" | "br";
-
-function readErrorMessage(payload: unknown): string {
-    if (!payload || typeof payload !== "object") {
-        return "Не вдалося увійти.";
-    }
-
-    const detail = (payload as { detail?: unknown }).detail;
-    if (typeof detail === "string") {
-        return detail;
-    }
-
-    return "Не вдалося увійти.";
-}
 
 export default function LoginPage() {
     const router = useRouter();
@@ -27,6 +15,7 @@ export default function LoginPage() {
     const [browserInput, setBrowserInput] = useState("");
     const [browserLoading, setBrowserLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const t = useTranslation();
 
     const riotAuthUrl = useMemo(
         () =>

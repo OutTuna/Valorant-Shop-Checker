@@ -4,9 +4,11 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { BACKEND_URL, saveStoredSession, type ShopSession } from "@/lib/valorant";
+import { useTranslation } from "../context/LanguageContext";
 
 export default function RiotRedirectPage() {
     const router = useRouter();
+    const t = useTranslation();
 
     useEffect(() => {
         const hash = window.location.hash || window.location.search;
@@ -48,7 +50,7 @@ export default function RiotRedirectPage() {
         <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">
             <div className="text-center space-y-4">
                 <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-red-500 border-t-transparent" />
-                <p className="text-gray-400 text-sm">Обрабатываем Riot redirect...</p>
+                <p className="text-gray-400 text-sm">{t('redirecting')}</p>
             </div>
         </div>
     );

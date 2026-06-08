@@ -439,7 +439,7 @@ async def _build_shop_payload(
     skin_lookup = {skin["uuid"]: skin for skin in skin_details}
     vp = wallet.get("Balances", {}).get(VP_CURRENCY_ID, 0)
 
-    logger.info("shop.payload done region=%s", resolved_region)
+    logger.info("shop.payload done region=%s vp=%s prices_count=%s", resolved_region, vp, len(prices))
     return {
         "player": {
             "puuid": puuid,
@@ -544,8 +544,11 @@ async def _fetch_wallet(
     )
     _log_response(f"wallet.{region}", response, raw_body=False)
     if response.status_code != 200:
+        logger.warning(f"wallet.{region} failed with status {response.status_code}")
         return {}
-    return response.json()
+    wallet_data = response.json()
+    logger.debug(f"wallet.{region} response: {wallet_data}")
+    return wallet_data
 
 
 async def _fetch_offer_prices(
@@ -559,10 +562,13 @@ async def _fetch_offer_prices(
     )
     _log_response(f"offers.{region}", response, raw_body=False)
     if response.status_code != 200:
+        logger.warning(f"offers.{region} failed with status {response.status_code}")
         return {}
+    offers_data = response.json()
+    logger.debug(f"offers.{region} response: {offers_data}")
     return {
         offer.get("OfferID"): _first_value(offer.get("Cost", {}))
-        for offer in response.json().get("Offers", [])
+        for offer in offers_data.get("Offers", [])
         if offer.get("OfferID")
     }
 
