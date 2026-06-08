@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -18,7 +18,14 @@ function formatDuration(seconds: number): string {
     return `${hours}:${minutes}:${secs}`;
 }
 
-function PriceCard({ item }: { item: ShopItem }) {
+function calculateRemainingTime(originalRemaining: number, loadTime: number): number {
+    const elapsedSeconds = Math.floor((Date.now() - loadTime) / 1000);
+    return Math.max(0, originalRemaining - elapsedSeconds);
+}
+
+function PriceCard({ item, loadTime }: { item: ShopItem; loadTime: number }) {
+    const currentRemaining = calculateRemainingTime(item.remaining, loadTime);
+
     return (
         <article className="bg-gray-900 rounded-xl border border-gray-800 p-5 shadow-lg">
             <div className="flex items-start justify-between gap-3 mb-4">
@@ -38,7 +45,7 @@ function PriceCard({ item }: { item: ShopItem }) {
                     {item.originalPrice ? (
                         <span className="line-through">{item.originalPrice} VP</span>
                     ) : (
-                        <span>Оновлення через {formatDuration(item.remaining)}</span>
+                        <span>Оновлення через {formatDuration(currentRemaining)}</span>
                     )}
                 </div>
                 <div className="font-bold text-yellow-400">
@@ -52,12 +59,30 @@ function PriceCard({ item }: { item: ShopItem }) {
 export default function HomePage() {
     const router = useRouter();
     const [session] = useState<ShopSession | null>(() => readStoredSession());
+    const [tick, setTick] = useState(0);
+    const loadTimeRef = useRef<number>(0);
 
     useEffect(() => {
+        // Set load time when we get a session (after login or on mount)
+        if (session && loadTimeRef.current === 0) {
+            loadTimeRef.current = Date.now();
+        }
+
         if (!session) {
             router.replace("/login");
         }
     }, [router, session]);
+
+    // Set up interval to trigger re-renders every second for smooth countdown
+    useEffect(() => {
+        if (!session) return;
+
+        const interval = setInterval(() => {
+            setTick(prev => prev + 1);
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [session]);
 
     const handleLogout = () => {
         clearStoredSession();
@@ -109,7 +134,7 @@ export default function HomePage() {
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {session.shop.daily.map((item) => (
-                        <PriceCard key={item.uuid} item={item} />
+                        <PriceCard key={item.uuid} item={item} loadTime={loadTimeRef.current} />
                     ))}
                 </div>
             </section>
@@ -144,7 +169,7 @@ export default function HomePage() {
                                     <div className="font-bold text-yellow-400">
                                         {item.discountedPrice} VP
                                     </div>
-                                    <div className="mt-1">Закінчується через {formatDuration(item.remaining)}</div>
+                                    <div className="mt-1">Закінчується через {formatDuration(calculateRemainingTime(item.remaining, loadTimeRef.current))}</div>
                                 </div>
                             </article>
                         ))}
