@@ -27,8 +27,12 @@ Next.js · FastAPI · Riot API
 
 <br />
 
-> ⚠️ **Disclaimer:** проект не связан с Riot Games. Используйте на свой риск — сторонние инструменты могут нарушать условия Riot.
-
+> ⚠️ **Дисклеймер и правовая информация:**
+> Этот проект является независимым и никак не связан с Riot Games.
+> 
+> **Valorant Store** isn’t endorsed by Riot Games and doesn’t reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Valorant. Valorant and Riot Games are trademarks or registered trademarks of Riot Games, Inc. Valorant © Riot Games, Inc.
+> 
+> *Вы используете эту программу исключительно на свой страх и риск. Использование сторонних инструментов для взаимодействия с внутренними API может нарушать Условия использования (Terms of Service) Riot Games.*
 </div>
 
 ---
