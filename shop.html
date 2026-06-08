@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Valorant Крамниця</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-white min-h-screen font-sans p-6 md:p-12" onload="autoLoadShop()">
+
+<div id="loading-block" class="max-w-xl mx-auto bg-gray-900 border border-gray-800 p-8 rounded-xl text-center shadow-2xl mt-40 relative">
+    <div class="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+    <h1 class="text-2xl font-black text-red-500 mb-4 tracking-wide uppercase animate-pulse">Синхронізація з ігровим ПК...</h1>
+    <p class="text-gray-400 text-xs">Додаток автоматично отримує десктопні права з запущеної гри.</p>
+    <div id="error-zone" class="hidden mt-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded text-left"></div>
+</div>
+
+<div id="shop-block" class="hidden max-w-7xl mx-auto">
+    <header class="flex flex-col sm:flex-row items-center justify-between bg-gray-900 p-6 rounded-xl border border-gray-800 mb-10 gap-4 shadow-xl">
+        <div>
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <span id="player-name">Player</span>
+                <span id="player-tag" class="text-gray-500 text-lg">#0000</span>
+            </h1>
+            <p class="text-xs text-red-500 font-semibold uppercase mt-1">Регіон: EU (Genuine Pure Desktop)</p>
+        </div>
+        <div class="flex items-center gap-3 bg-gray-950 px-5 py-2.5 rounded-lg border border-gray-800">
+            <div class="w-5 h-5 bg-yellow-500 rotate-45 flex items-center justify-center text-[10px] text-black font-black font-serif">V</div>
+            <span id="player-vp" class="font-mono font-bold text-xl text-yellow-400">0 <span class="text-xs text-gray-400">VP</span></span>
+        </div>
+    </header>
+
+    <h2 class="text-xl font-bold uppercase tracking-wider text-gray-400 mb-6 flex items-center gap-2">
+        <span class="w-2 h-2 bg-red-500"></span> Пропозиції дня:
+    </h2>
+    <div id="skins-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+</div>
+
+<script>
+    async function autoLoadShop() {
+        const errorZone = document.getElementById('error-zone');
+        try {
+            const res = await fetch('http://localhost:8000/api/shop', { method: 'POST' });
+            const data = await res.json();
+
+            if (!res.ok) {
+                errorZone.innerText = data.detail || "Помилка синхронізації.";
+                errorZone.classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('loading-block').classList.add('hidden');
+            document.getElementById('shop-block').classList.remove('hidden');
+
+            document.getElementById('player-name').innerText = data.player.name;
+            document.getElementById('player-tag').innerText = data.player.tag;
+            document.getElementById('player-vp').innerText = data.player.vp + " VP";
+
+            const grid = document.getElementById('skins-grid');
+            grid.innerHTML = '';
+
+            data.shop.forEach(skin => {
+                grid.innerHTML += `
+                        <div class="bg-gray-900 rounded-xl p-6 flex flex-col items-center justify-between border border-gray-800 hover:border-red-500/40 transition-all group relative overflow-hidden shadow-lg">
+                            <span class="absolute top-3 right-3 text-[10px] font-bold uppercase px-2 py-0.5 bg-gray-800 rounded text-gray-500 border border-gray-700">${skin.tier}</span>
+                            <h3 class="text-md font-semibold text-center mb-6 min-h-[48px] flex items-center justify-center group-hover:text-red-400 transition-colors">${skin.name}</h3>
+                            <div class="w-full h-32 flex items-center justify-center my-4">
+                                <img src="${skin.img}" alt="${skin.name}" class="max-w-full max-h-full object-contain transform group-hover:scale-105 transition-transform" />
+                            </div>
+                            <div class="mt-6 font-mono font-bold text-yellow-500 flex items-center gap-1.5 bg-gray-950 px-4 py-1.5 rounded-md border border-gray-800">${skin.price} VP</div>
+                        </div>
+                    `;
+            });
+        } catch (err) {
+            errorZone.innerText = "Не вдалося зв'язатися з бекендом FastAPI на Маці.";
+            errorZone.classList.remove('hidden');
+        }
+    }
+</script>
+</body>
+</html>
