@@ -16,6 +16,8 @@ Next.js · FastAPI · Riot API
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.136-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/gpl-3.0)
 
 <br />
 
@@ -246,6 +248,10 @@ npm run lint     # ESLint
 <sub>Made with Next.js & FastAPI · Not affiliated with Riot Games</sub>
 
 <br />
+
+## 📄 Лицензия
+
+Этот проект распространяется под лицензией [MIT License](LICENSE) — подробности можно найти в файле.
 
 [English](README.md)
 
