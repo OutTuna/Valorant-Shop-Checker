@@ -8,10 +8,10 @@ import { useTranslation } from "../context/LanguageContext";
 
 export default function RiotRedirectPage() {
     const router = useRouter();
-    const t = useTranslation();
+    const t      = useTranslation();
 
     useEffect(() => {
-        const hash = window.location.hash || window.location.search;
+        const hash  = window.location.hash || window.location.search;
         const match = hash.match(/access_token=([^&]+)/);
 
         if (!match?.[1]) {
@@ -20,7 +20,7 @@ export default function RiotRedirectPage() {
         }
 
         const accessToken = decodeURIComponent(match[1]);
-        const region = window.sessionStorage.getItem("valorant-region") || "auto";
+        const region      = window.sessionStorage.getItem("valorant-region") || "auto";
 
         (async () => {
             try {
@@ -33,8 +33,8 @@ export default function RiotRedirectPage() {
                 if (!response.ok) {
                     throw new Error(
                         typeof payload === "object" && payload && "detail" in payload
-                            ? String((payload as { detail?: unknown }).detail ?? "Не удалось войти.")
-                            : "Не удалось войти.",
+                            ? String((payload as { detail?: unknown }).detail ?? "Login failed.")
+                            : "Login failed.",
                     );
                 }
 
@@ -47,10 +47,13 @@ export default function RiotRedirectPage() {
     }, [router]);
 
     return (
-        <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">
+        <div className="min-h-screen bg-theme-base flex items-center justify-center text-theme-primary">
             <div className="text-center space-y-4">
-                <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-red-500 border-t-transparent" />
-                <p className="text-gray-400 text-sm">{t('redirecting')}</p>
+                <div
+                    className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-t-transparent"
+                    style={{ borderRightColor: "var(--accent-red)", borderBottomColor: "var(--accent-red)", borderLeftColor: "var(--accent-red)" }}
+                />
+                <p className="text-theme-secondary text-sm">{t("redirecting")}</p>
             </div>
         </div>
     );

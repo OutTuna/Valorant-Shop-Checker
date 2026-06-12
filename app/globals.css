@@ -1,26 +1,199 @@
 @import "tailwindcss";
 
+/* ─── Design tokens ─────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* dark theme (default) */
+  --bg-base:        #030712;   /* gray-950 */
+  --bg-surface:     #111827;   /* gray-900 */
+  --bg-elevated:    #1f2937;   /* gray-800 */
+  --bg-input:       #030712;
+  --border-subtle:  #1f2937;
+  --border-default: #374151;   /* gray-700 */
+  --text-primary:   #f9fafb;   /* gray-50  */
+  --text-secondary: #9ca3af;   /* gray-400 */
+  --text-muted:     #6b7280;   /* gray-500 */
+  --accent-red:     #ef4444;
+  --accent-purple:  #a855f7;
+  --accent-gold:    #facc15;   /* yellow-400 */
+  --card-bg:        #111827;
+  --card-border:    #1f2937;
+  --tag-bg:         #1f2937;
+  --tag-border:     #374151;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── White theme ────────────────────────────── */
+html.theme-white {
+  --bg-base:        #ffffff;
+  --bg-surface:     #ffffff;
+  --bg-elevated:    #f3f4f6;
+  --bg-input:       #ffffff;
+  --border-subtle:  #f3f4f6;
+  --border-default: #e5e7eb;
+  --text-primary:   #000000;
+  --text-secondary: #4b5563;
+  --text-muted:     #9ca3af;
+  --accent-red:     #ef4444;
+  --accent-purple:  #a855f7;
+  --accent-gold:    #eab308;
+  --card-bg:        #ffffff;
+  --card-border:    #f3f4f6;
+  --tag-bg:         #ffffff;
+  --tag-border:     #e5e7eb;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Catppuccin theme (Mocha) ───────────────── */
+html.theme-catppuccin {
+  --bg-base:        #11111b; /* crust */
+  --bg-surface:     #1e1e2e; /* base */
+  --bg-elevated:    #313244; /* surface0 */
+  --bg-input:       #11111b; /* crust */
+  --border-subtle:  #313244; /* surface0 */
+  --border-default: #45475a; /* surface1 */
+  --text-primary:   #cdd6f4; /* text */
+  --text-secondary: #a6adc8; /* subtext0 */
+  --text-muted:     #6c7086; /* overlay0 */
+  --accent-red:     #f38ba8; /* red */
+  --accent-purple:  #cba6f7; /* mauve */
+  --accent-gold:    #f9e2af; /* yellow */
+  --card-bg:        #181825; /* mantle */
+  --card-border:    #313244; /* surface0 */
+  --tag-bg:         #313244; /* surface0 */
+  --tag-border:     #45475a; /* surface1 */
 }
 
+/* ─── Base styles ────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: "Inter", "Segoe UI", Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* ─── Utility classes ────────────────────────── */
+.bg-theme-base      { background-color: var(--bg-base); }
+.bg-theme-surface   { background-color: var(--bg-surface); }
+.bg-theme-elevated  { background-color: var(--bg-elevated); }
+.bg-theme-input     { background-color: var(--bg-input); }
+.border-theme       { border-color: var(--border-default); }
+.border-theme-subtle{ border-color: var(--border-subtle); }
+.text-theme-primary { color: var(--text-primary); }
+.text-theme-secondary{ color: var(--text-secondary); }
+.text-theme-muted   { color: var(--text-muted); }
+.text-accent-gold   { color: var(--accent-gold); }
+.text-accent-red    { color: var(--accent-red); }
+.text-accent-purple { color: var(--accent-purple); }
+
+/* ─── Card ───────────────────────────────────── */
+.shop-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.shop-card:hover {
+  border-color: var(--border-default);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+
+/* Fixed card title height so changing language doesn't resize card */
+.card-title {
+  font-weight: 600;
+  line-height: 1.3;
+  min-height: 2.6em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Fixed badge width so layout doesn't shift on language change */
+.card-badge {
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: var(--tag-bg);
+  border: 1px solid var(--tag-border);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Fixed price row height so it doesn't jump */
+.card-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+  min-height: 1.75rem;
+  font-size: 0.875rem;
+}
+
+/* ─── Night market placeholder ───────────────── */
+.night-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px dashed var(--border-default);
+  background: linear-gradient(135deg, rgba(168,85,247,0.04) 0%, rgba(168,85,247,0.0) 100%);
+}
+
+/* ─── Language flag buttons ──────────────────── */
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid var(--border-default);
+  font-size: 1.15rem;
+  cursor: pointer;
+  background: transparent;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.lang-btn:hover { transform: scale(1.1); }
+.lang-btn.active { border-color: var(--accent-gold); }
+
+/* ─── Theme toggle ───────────────────────────── */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid var(--border-default);
+  cursor: pointer;
+  background: transparent;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  color: var(--text-secondary);
+}
+.theme-toggle:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+/* ─── Smooth transitions ─────────────────────── */
+.shop-card,
+.lang-btn,
+.theme-toggle,
+.card-badge,
+[class*="bg-theme"],
+[class*="border-theme"],
+[class*="text-theme"] {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* ─── Scrollbar (dark) ───────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 99px; }

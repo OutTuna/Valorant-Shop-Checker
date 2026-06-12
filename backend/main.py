@@ -26,7 +26,7 @@ LOG_FILE = LOG_DIR / "valorant_backend.log"
 
 logger = logging.getLogger("valorant_backend")
 if not logger.handlers:
-    logger.setLevel(logging.DEBUG if os.getenv("VALORANT_DEBUG", "0") == "1" else logging.INFO)
+    logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
         "%(asctime)s %(levelname)s %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
@@ -423,7 +423,21 @@ async def _build_shop_payload(
     riot_headers = _riot_headers(access_token, entitlements_token, client_version)
     storefront = await _fetch_storefront(client, resolved_region, puuid, riot_headers)
     wallet = await _fetch_wallet(client, resolved_region, puuid, riot_headers)
+
+    # Dump for debugging
+    try:
+        with open("storefront_dump.json", "w", encoding="utf-8") as f:
+            json.dump(storefront, f, indent=2)
+        with open("wallet_dump.json", "w", encoding="utf-8") as f:
+            json.dump(wallet, f, indent=2)
+    except Exception as e:
+        logger.error("Failed to dump storefront/wallet to file: %s", e)
+
+    # Try dedicated prices endpoint first; fall back to extracting from storefront
     prices = await _fetch_offer_prices(client, resolved_region, riot_headers)
+    if not prices:
+        logger.info("offers endpoint unavailable, extracting prices from storefront")
+        prices = _extract_prices_from_storefront(storefront)
 
     skin_cache: dict[str, dict[str, Any]] = {}
     skin_ids = set(storefront.get("SkinsPanelLayout", {}).get("SingleItemOffers", []))
@@ -556,22 +570,51 @@ async def _fetch_offer_prices(
     region: str,
     headers: dict[str, str],
 ) -> dict[str, int]:
+    """Fetch all offer prices from the Riot prices endpoint.
+    Falls back to an empty dict if the endpoint returns an error.
+    Note: /store/v1/offers/ may return 404 for some regions/accounts.
+    In that case, prices will be extracted from the storefront directly.
+    """
     response = await client.get(
         f"https://pd.{region}.a.pvp.net/store/v1/offers/",
         headers=headers,
     )
     _log_response(f"offers.{region}", response, raw_body=False)
     if response.status_code != 200:
-        logger.warning(f"offers.{region} failed with status {response.status_code}")
+        logger.warning(
+            "offers.%s failed with status %s - will extract prices from storefront",
+            region, response.status_code
+        )
         return {}
     offers_data = response.json()
-    logger.debug(f"offers.{region} response: {offers_data}")
+    logger.debug("offers.%s ok, offers_count=%s", region, len(offers_data.get("Offers", [])))
     return {
         offer.get("OfferID"): _first_value(offer.get("Cost", {}))
         for offer in offers_data.get("Offers", [])
         if offer.get("OfferID")
     }
 
+
+def _extract_prices_from_storefront(storefront: dict[str, Any]) -> dict[str, int]:
+    """Extract skin prices from the SingleItemStoreOffers field in v3 storefront.
+    This is a fallback when /store/v1/offers/ is unavailable.
+    The v3 storefront includes Cost per offer in SkinsPanelLayout.SingleItemStoreOffers.
+    """
+    prices: dict[str, int] = {}
+    panel = storefront.get("SkinsPanelLayout", {})
+
+    # v3 storefront has SingleItemStoreOffers with full offer details including Cost
+    for store_offer in panel.get("SingleItemStoreOffers", []):
+        offer_id = store_offer.get("OfferID")
+        if not offer_id:
+            continue
+        cost = store_offer.get("Cost", {})
+        price = _first_value(cost)
+        if price:
+            prices[offer_id] = price
+
+    logger.debug("storefront.prices_extracted count=%s", len(prices))
+    return prices
 
 async def _skin_catalog(
     client: httpx.AsyncClient,

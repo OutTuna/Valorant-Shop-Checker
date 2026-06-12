@@ -46,6 +46,9 @@ Next.js · FastAPI · Riot API
 | 🛒 **Daily shop** | Current daily skins with VP prices and refresh timer |
 | 🌙 **Night market** | Discounts, percentages, and time left in the rotation |
 | 💰 **VP balance** | Your current Valorant Points on the account |
+| 🎨 **Themes** | Choose between Dark, White, and Catppuccin styles |
+| 🌐 **Localization** | Support for English, Ukrainian, Russian, and Polish with country flags |
+| 🔍 **Skin Search** | Click on any skin image to instantly search it on Google |
 | 🌍 **Regions** | EU, NA, AP, KR, LATAM, BR, or auto-detection |
 | 🔐 **Two login methods** | Riot Client on your PC or browser access token |
 | 🖥️ **Runs locally** | Everything on `127.0.0.1` — no cloud session storage |
@@ -181,6 +184,7 @@ flowchart TB
 ```
 .
 ├── app/
+│   ├── context/        # Localization and theme state
 │   ├── login/          # Login page
 │   ├── redirect/       # Riot redirect handler
 │   └── page.tsx        # Main shop view

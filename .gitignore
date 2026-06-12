@@ -50,6 +50,10 @@ backend/logs/
 *.egg-info/
 .venv/
 
+# backend dumps
+*_dump.json
+debug*.json
+
 # IDE
 .idea/
 *.iml

@@ -1,10 +1,11 @@
 # Visual chapter :
- 1. Fix VP points, they doesn't show any price under guns
- 2. Fix cards of guns, they moving when changing language
- 3. Change name of language to flag of contry
- 4. Add more localizations
- 5. Do a placeholder for night market, with timer of his showing, timer must be on center
- 6. Add more themes, including white
+ [x] 1. Fix VP points, they doesn't show any price under guns
+ [x] 2. Fix cards of guns, they moving when changing language
+ [x] 3. Change name of language to flag of contry
+ [x] 4. Add more localizations
+ [x] 5. Do a placeholder for night market, with timer of his showing, timer must be on center
+ [x] 6. Add more themes, including white
+ [x] 7. Link to guns, on official site
 
 # Tech chapter:
  1. Make autocookie(in link) grabber, and showing immediately after login
