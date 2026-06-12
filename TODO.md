@@ -17,3 +17,7 @@
  1. Make more flexible backend.
  2. Clear code
  3. Split project on more multi-files (i think it's necessary, the most later update must be)
+
+
+# The Future:
+1. Make adjustive interface for phone
